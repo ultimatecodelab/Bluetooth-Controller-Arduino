@@ -12,13 +12,18 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
 
 public class MainActivity extends Activity {
 
     private TextView txtSpeechInput;
     private ImageButton btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
+    TextToSpeech t1;
 
+    private void sendVoiceCommand(String command){
+        t1.speak("Sending the command:  " + command + " to your bluetooth chip.", TextToSpeech.QUEUE_FLUSH, null);
+    }//send voice command
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +35,11 @@ public class MainActivity extends Activity {
         // hide the action bar
        // getActionBar().hide();
 
+        microphoneBtnClicked();
+        initTextToSpeechEngine();
+    }
+
+    private void microphoneBtnClicked() {
         btnSpeak.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -37,7 +47,17 @@ public class MainActivity extends Activity {
                 promptSpeechInput();
             }
         });
+    }
 
+    private void initTextToSpeechEngine() {
+        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.UK);
+                }
+            }
+        });
     }
 
     /**
@@ -72,6 +92,8 @@ public class MainActivity extends Activity {
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     txtSpeechInput.setText(result.get(0));
+                    sendVoiceCommand(result.get(0));
+
                 }
                 break;
             }
