@@ -14,6 +14,13 @@
         android:layout_height="wrap_content"
         android:text="Your text"
         android:id="@+id/txtSpeechInput" />
+    <TextView
+        android:id="@+id/messages"
+        android:layout_width="200px"
+        android:layout_height="170px"
+
+        android:layout_centerVertical="true"
+        android:layout_alignStart="@+id/btnSpeak" />
 
     <ImageButton
         android:layout_width="300px"
