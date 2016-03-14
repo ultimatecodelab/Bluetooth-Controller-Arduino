@@ -253,7 +253,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View arg0, MotionEvent arg1) {
                 if (arg1.getAction() == MotionEvent.ACTION_DOWN)
-                    sendButtonsCommand("back");
+                    sendButtonsCommand("reverse");
                 else if (arg1.getAction() == MotionEvent.ACTION_UP)
                     sendButtonsCommand("stop");
                 return true;
