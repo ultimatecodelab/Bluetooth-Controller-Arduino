@@ -15,7 +15,9 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -47,7 +49,12 @@ public class MainActivity extends Activity {
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private TextToSpeech t1;
 
-
+    //controls buttons
+    private Button forward;
+    private Button back;
+    private Button left;
+    private Button right;
+    private Button disconnectBtn;
     // BTLE state
     private BluetoothAdapter adapter;
     private BluetoothGatt gatt;
@@ -56,8 +63,9 @@ public class MainActivity extends Activity {
     private HashMap<String,Character> commands = new HashMap<String,Character>();
 
     private void initCommands(){
+
         commands.put("forward", 'F');
-        commands.put("back", 'B');
+        commands.put("reverse", 'B');
         commands.put("left", 'L');
         commands.put("right", 'R');
         commands.put("stop", 'N');
@@ -147,9 +155,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         // Grab references to UI elements.
-        messages = (TextView) findViewById(R.id.messages);
-        input = (EditText) findViewById(R.id.input);
+       // messages = (TextView) findViewById(R.id.messages);
+       // input = (EditText) findViewById(R.id.input);
 
         initCommands();//init set of valid commands...
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
@@ -157,6 +166,22 @@ public class MainActivity extends Activity {
 
         microphoneBtnClicked();
         initTextToSpeechEngine();
+
+        forward = (Button) findViewById(R.id.forward);
+        back = (Button) findViewById(R.id.backward);
+        left = (Button) findViewById(R.id.left);
+        right = (Button) findViewById(R.id.right);
+        disconnectBtn = (Button) findViewById(R.id.disconnect);
+
+        //contollers
+        forwardBtnClickedEvent();
+        backBtnClickedEvent();
+        rightBtnClickedEvent();
+        leftBtnClickedEvent();
+        disconnect();
+
+
+        //set event on forward
     }
 
     private void sendVoiceCommand(String cmd){
@@ -169,6 +194,18 @@ public class MainActivity extends Activity {
         else{
             writeLine(tempStr);
             t1.speak("Invalid Command: " + tempStr, TextToSpeech.QUEUE_FLUSH, null);
+        }
+    }//send voice command
+    private void sendButtonsCommand(String cmd){
+        String tempStr= cmd.toLowerCase();
+        if(commands.containsKey(tempStr)){
+            //send to bluetooth chipshit
+            sendCommandToBluetooth(commands.get(tempStr).toString());
+            //t1.speak("Sending the command:  " + tempStr + " to your bluetooth chip.", TextToSpeech.QUEUE_FLUSH, null);
+        }
+        else{
+            writeLine(tempStr);
+            //t1.speak("Invalid Command: " + tempStr, TextToSpeech.QUEUE_FLUSH, null);
         }
     }//send voice command
     public void sendCommandToBluetooth(String str) {
@@ -186,7 +223,67 @@ public class MainActivity extends Activity {
             writeLine("Couldn't write TX characteristic!");
         }
     }//sendCommandToBluetooth
+    private  void disconnect(){
+        disconnectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    gatt.disconnect();
+                    adapter.disable();
+                } catch (Exception e) {
 
+                }
+            }
+        });
+    }
+    private void forwardBtnClickedEvent(){
+        forward.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View arg0, MotionEvent arg1) {
+                if (arg1.getAction() == MotionEvent.ACTION_DOWN)
+                    sendButtonsCommand("forward");
+                else if (arg1.getAction() == MotionEvent.ACTION_UP)
+                    sendButtonsCommand("stop");
+                return true;
+            }
+        });
+    }
+    private void backBtnClickedEvent(){
+        back.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View arg0, MotionEvent arg1) {
+                if (arg1.getAction() == MotionEvent.ACTION_DOWN)
+                    sendButtonsCommand("back");
+                else if (arg1.getAction() == MotionEvent.ACTION_UP)
+                    sendButtonsCommand("stop");
+                return true;
+            }
+        });
+    }
+    private void rightBtnClickedEvent(){
+        right.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View arg0, MotionEvent arg1) {
+                if (arg1.getAction() == MotionEvent.ACTION_DOWN)
+                    sendButtonsCommand("right");
+                else if (arg1.getAction() == MotionEvent.ACTION_UP)
+                    sendButtonsCommand("stop");
+                return true;
+            }
+        });
+    }
+    private void leftBtnClickedEvent(){
+        left.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View arg0, MotionEvent arg1) {
+                if (arg1.getAction() == MotionEvent.ACTION_DOWN)
+                    sendButtonsCommand("left");
+                else if (arg1.getAction() == MotionEvent.ACTION_UP)
+                    sendButtonsCommand("stop");
+                return true;
+            }
+        });
+    }
     private void microphoneBtnClicked() {
         btnSpeak.setOnClickListener(new View.OnClickListener() {
 
@@ -251,8 +348,13 @@ public class MainActivity extends Activity {
         super.onResume();
         // Scan for all BTLE devices.
         // The first one with the UART service will be chosen--see the code in the scanCallback.
-        writeLine("Scanning for devices...");
+        //writeLine("Scanning for devices...");
+        adapter.enable();
+        adapter = BluetoothAdapter.getDefaultAdapter();
         adapter.startLeScan(scanCallback);
+
+
+       // adapter.sta
     }
 
     // OnStop, called right before the activity loses foreground focus.  Close the BTLE connection.
@@ -293,8 +395,8 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                messages.append(text);
-                messages.append("\n");
+               // messages.append(text);
+                //messages.append("\n");
             }
         });
     }
