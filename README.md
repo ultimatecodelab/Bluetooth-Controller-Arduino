@@ -9,6 +9,7 @@ Developed an android app to control the robot remotely using the app user interf
 Speech recognition – can directly talk to the app and it will forward the command to the Bluetooth chip. 
 nRF UART can be used to connect to Bluetooth® Smart (Bluetooth low energy).When connected, the app can send and receive ASCII text strings.
 
+﻿![Alt text](https://github.com/ultimatecodelab/Bluetooth-Controller-Arduino/blob/master/gestureimg.PNG "architecture")
 
 
 ###We have our arduino project at : https://github.com/Pringlez/Gesture-UI-Project
